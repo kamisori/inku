@@ -148,11 +148,6 @@
  :lflags [;default-lflags
           ;lflags])
 
-(declare-executable
-  :name "accidental-ui-horror"
-  :entry "./test/100-test-accidental-ui-horror.janet")
-
-
 (phony "gen" []
        (os/execute ["janet" "src/bind-inku.janet"] :p)
 #       (os/execute ["janet" "src/bind-vk.janet"] :p)

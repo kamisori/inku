@@ -1,4 +1,4 @@
-(use joinkyloinky)
+(use ../../build/joinkyloinky)
 (use spork/misc)
 (import spork/schema :as schema)
 
