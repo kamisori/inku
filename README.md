@@ -91,3 +91,8 @@ coming soonish:
 #### Credits to imgui's ocornut for making the most awesome ui implementation out there (for use cases//)
 
 and the other projects too :3
+
+
+##### pls bear with my unprofessionality in favor of conviviality, but do express concerns if you have any.
+
+otherwise, this tree is mine to piss on and bark at, if you want to join in and help the tree grow, give a yelp :3
