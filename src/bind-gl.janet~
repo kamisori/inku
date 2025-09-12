@@ -1,0 +1,421 @@
+(import spork/cjanet :as c)
+
+(import ./bind-glfw :as b)
+
+(defn get-loinky-binding []
+  [
+   (c/function loinky_glClear_which_bitmask_q
+               :static
+      ""
+      [value:Janet] -> GLbitfield
+      (if (janet_checktype value JANET_KEYWORD)
+        (do
+          (def (kw (const uint8_t*)) (janet_unwrap_keyword value))
+          (switch kw
+                  "color" (return GL_COLOR_BUFFER_BIT)
+                  "depth" (return GL_DEPTH_BUFFER_BIT)
+                  "stencil" (return GL_STENCIL_BUFFER_BIT)))
+        (janet_panic "expected keyword")))
+
+   '(c/cfunction jl__clear
+     :static
+       ""
+     [& args:Janet] -> :Janet
+       (do
+         (def tmp GLbitfield 0)
+         (def arlen (janet_length args))
+         (def i uint)
+         (for [(set i 0) (< i arlen) (++ i)]
+             (set tmp (bor tmp (loinky_glClear_which_bitmask_q (aref args i)))))
+         (glClear tmp)
+         (return (janet_wrap_nil))))
+
+   '(c/cfunction jl__clear-color
+     :static
+       ""
+     [(r :float 0.0) (g :float 0.0) (b :float 0.0) (a :float 0.0)] -> :Janet
+       (do
+         
+         (glClearColor r g b a)
+         (return (janet_wrap_nil)))
+    )
+
+   '(c/cfunction jl__viewport 0 0 display_w display_h
+     :static
+       ""
+     [] -> :Janet
+       (glViewport )
+    )
+  ])
+
+(defn get-joinky-loinky-binding []
+  (let [outbuffer (buffer)]
+    (with-dyns [*out* outbuffer]
+      (c/include <janet.h>)
+      (c/include <stdbool.h>)
+
+      (print `#include "GLFW/glfw3.h"`)
+      (print `#include "imgui.h"`)
+
+      (print `#include "imgui_impl_glfw.h"`)
+      (print `#include "imgui_impl_opengl3.h"`)
+      (map
+       |(macex1 $0)
+       [;(b/get-joinky-binding)
+       ;(get-loinky-binding)])
+
+## minimal imgui example
+
+      
+
+(macex1 '(c/cfunction imgui__begin_b
+  :static
+  ""
+  [label:cstring (p_open_i :bool)] -> :Janet
+    (do
+      (def (p_open_b :bool) (cast bool p_open_i))
+      (def tmp (addr p_open_b))
+      (ImGui::Begin label tmp)
+      (return (janet_wrap_boolean p_open_b)))))
+
+(macex1 '(c/cfunction imgui__begin
+  :static
+  ""
+  [label:cstring] -> :Janet
+    (do
+      (ImGui::Begin label NULL)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__button
+  :static
+  ""
+  [label:cstring &opt (x :float 0.0) (y :float 0.0)] -> :Janet
+    (return (janet_wrap_boolean (ImGui::Button label (ImVec2 x y))))))
+
+(macex1 '(c/cfunction imgui__checkbox
+  :static
+  ""
+  [label:cstring (p_open_i :bool)] -> :Janet
+    (do
+      (def (p_open_b :bool) (cast bool p_open_i))
+      (def tmp (addr p_open_b))
+      (ImGui::Checkbox label tmp)
+      (return (janet_wrap_boolean p_open_b)))))
+
+(macex1 '(c/cfunction imgui__check-version
+  :static
+  ""
+  [] -> :Janet
+  (ImGui::DebugCheckVersionAndDataLayout
+    IMGUI_VERSION
+    (sizeof ImGuiIO)
+    (sizeof ImGuiStyle)
+    (sizeof ImVec2)
+      (sizeof ImVec4)
+      (sizeof ImDrawVert)
+      (sizeof ImDrawIdx))
+  (return (janet_wrap_nil))))
+
+(macex1 '(c/cfunction imgui__color-edit3
+  :static
+  ""
+  [label:cstring (r :float) (g :float) (b :float)] -> :Janet
+    (do
+      (def (cols (array float)) @[r g b])
+      (return
+       (janet_wrap_boolean
+        (ImGui::ColorEdit3 label cols))))))
+
+(macex1 '(c/cfunction imgui__create-context
+  :static
+  ""
+  [&opt (imFontAtlas :pointer NULL)] -> :Janet
+  (return
+    (janet_wrap_pointer
+      (ImGui::CreateContext
+        (cast ImFontAtlas* imFontAtlas))))))
+
+(macex1 '(c/cfunction imgui__destroy-context
+  :static
+  ""
+  [] -> :Janet
+    (do
+      (ImGui::DestroyContext)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__end
+  :static
+  ""
+  [] -> :Janet
+    (do
+      (ImGui::End)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__get-draw-data
+  :static
+  ""
+  [] -> :Janet
+    (return (janet_wrap_pointer (ImGui::GetDrawData)))))
+
+(macex1 '(c/cfunction imgui__impl-glfw-init-for-opengl
+  :static
+  ""
+  [window:pointer (install_callbacks :bool :false)] -> :Janet
+    (do
+      (return
+       (janet_wrap_boolean
+        (ImGui_ImplGlfw_InitForOpenGL
+         (cast GLFWwindow* window) install_callbacks)
+        )))))
+
+(macex1 '(c/cfunction imgui__impl-glfw-new-frame
+  :static
+  ""
+  [] -> :Janet
+    (do
+      (ImGui_ImplGlfw_NewFrame)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__impl-glfw-shutdown
+  :static
+  ""
+  [] -> :Janet
+    (do
+      (ImGui_ImplGlfw_Shutdown)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__impl-glfw-sleep
+  :static
+  ""
+  [(milliseconds :int)] -> :Janet
+    (do
+      (ImGui_ImplGlfw_Sleep milliseconds)
+      (return (janet_wrap_nil)))))
+
+(macex1
+ '(c/cfunction imgui__impl-opengl3-render-draw-data
+   :static
+     ""
+   [draw_data:pointer] -> :Janet
+     (do
+       (ImGui_ImplOpenGL3_RenderDrawData (cast ImDrawData* draw_data))
+       (return (janet_wrap_nil))
+       )))
+
+(macex1 '(c/cfunction imgui__impl-opengl3-init
+  :static
+  ""
+  [&opt (glsl_version :cstring NULL)] -> :Janet
+    (return (janet_wrap_boolean (ImGui_ImplOpenGL3_Init)))))
+
+(macex1 '(c/cfunction imgui__impl-opengl3-new-frame
+  :static
+  ""
+  [] -> :Janet
+    (do
+      (ImGui_ImplOpenGL3_NewFrame)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__impl-opengl3-shutdown
+  :static
+  ""
+  [] -> :Janet
+    (do
+      (ImGui_ImplOpenGL3_Shutdown)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__io-get-framerate
+  :static
+    ""
+  [] -> :Janet
+    (return (janet_wrap_number (. (ImGui::GetIO) Framerate)))))
+
+(macex1 '(c/cfunction imgui__new-frame
+  :static
+  ""
+  [] -> :Janet
+    (do
+      (ImGui::NewFrame)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__render
+  :static
+  ""
+  [] -> :Janet
+    (do
+      (ImGui::Render)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__same-line
+  :static
+  ""
+  [&opt (offset :float 0.0) (spacing :float -1.0)] -> :Janet
+    (do
+      (ImGui::SameLine offset spacing)
+      (return (janet_wrap_nil)))))
+
+(macex1 (c/declare
+  (imgui_config_flags (array KeyDef)) "static const"
+  @[
+     @["none" ImGuiConfigFlags_None]
+     @["nav-enable-keyboard" ImGuiConfigFlags_NavEnableKeyboard]
+     @["nav-enable-gamepad" ImGuiConfigFlags_NavEnableGamepad]
+     @["nav-enable-set-mouse-pos" ImGuiConfigFlags_NavEnableSetMousePos]
+     @["nav-no-capture-keyboard" ImGuiConfigFlags_NavNoCaptureKeyboard]
+     @["no-mouse" ImGuiConfigFlags_NoMouse]
+     @["no-mouse-cursor-change" ImGuiConfigFlags_NoMouseCursorChange]
+     @["no-keyboard" ImGuiConfigFlags_NoKeyboard]
+     @["is-srgb" ImGuiConfigFlags_IsSRGB]
+     @["is-touch-screen" ImGuiConfigFlags_IsTouchScreen]
+   ]))
+
+(macex1 (c/function joinky_getimguiconfigflag
+               :static
+      [argv:Janet] -> int
+      (return (joinky_castdef argv
+                             imgui_config_flags
+                             (/ (sizeof imgui_config_flags)
+                                (sizeof KeyDef))))))
+
+(macex1 '(c/cfunction imgui__set-config-flags-or 
+  :static
+  ""
+  [flagtoset:Janet] -> :Janet
+    (do
+      (def (io ImGuiIO&) (ImGui::GetIO))
+      (if (janet_checktypes flagtoset JANET_TFLAG_INDEXED)
+        (do
+          (def arlen (janet_length flagtoset))
+          (def (i :int))
+          (for [(set i 0) (< i arlen) (++ i)]
+              (set (. io ConfigFlags)
+                   (bor (. io ConfigFlags)
+                        (joinky_getimguiconfigflag
+                         (janet_getindex flagtoset i))))))
+        (set (. io ConfigFlags)
+             (bor (. io ConfigFlags)
+                  (joinky_getimguiconfigflag
+                   flagtoset))))
+      (return (janet_wrap_nil))
+      )))
+
+(macex1 '(c/cfunction imgui__show-demo-window_b
+  :static
+  ""
+  [(p_open_i :bool)] -> :Janet
+    (do
+      (def (p_open_b :bool) (cast bool p_open_i))
+      (def tmp (addr p_open_b))
+      (ImGui::ShowDemoWindow tmp)
+      (return (janet_wrap_boolean p_open_b)))))
+
+(macex1 '(c/cfunction imgui__show-demo-window
+  :static
+  ""
+  [] -> :Janet
+    (do
+      (ImGui::ShowDemoWindow NULL)
+      (return (janet_wrap_nil)))))
+
+(macex1 '(c/cfunction imgui__slider-float "float"
+  :static
+  ""
+  [label:cstring value:float minv:float maxv:float] -> :Janet
+    (do
+      (ImGui::SliderFloat label (addr value) minv maxv)
+      (return (janet_wrap_number value))
+      )))
+
+(macex1 '(c/cfunction imgui__style-colors-dark
+  :static
+  ""
+  [] -> :Janet
+    (ImGui::StyleColorsDark)
+    (return (janet_wrap_nil))
+  ))
+
+(macex1 '(c/cfunction imgui__style-colors-light
+  :static
+  ""
+  [] -> :Janet
+    (ImGui::StyleColorsLight)
+    (return (janet_wrap_nil))
+ ))
+
+(macex1 '(c/cfunction imgui__text
+  :static
+  ""
+  [str:cstring] -> :Janet
+    (do
+      (ImGui::Text str NULL)
+      (return (janet_wrap_nil)))))
+
+#       ]) # for (map |(macex1 $0)[
+      (macex1 '(c/module-entry "joinkyloinky"))
+      (flush))
+    (string outbuffer)))
+
+
+(def filepath "./src/generated_glfw_and_opengl3.cpp")
+
+(try
+  (os/rm filepath)
+  ([err] (print "err: " err)))
+
+(->> (get-joinky-loinky-binding)
+    (spit filepath ))
+
+(comment todo for minimal opengl
+         glActiveTexture
+         glAttachShader
+         glBindBuffer
+         glBindTexture
+         glBindVertexArray
+         glBlendFunc
+         glBufferData
+         glClear
+         glClearColor
+         glCompileShader
+         glCopyTexImage2D
+         glCreateProgram
+         glCreateShader
+         glDeleteProgram
+         glDeleteShader
+         glDeleteTextures
+         glDisable
+         glDisableVertexAttribArray
+         glDrawArrays
+         glEnable
+         glEnableVertexAttribArray
+         glewGetErrorString
+         glewGetString
+         glewInit
+         glGenBuffers
+         glGenTextures
+         glGenVertexArrays
+         glGetAttribLocation
+         glGetError
+         glGetProgramInfoLog
+         glGetProgramiv
+         glGetShaderInfoLog
+         glGetShaderiv
+         glGetString
+         glGetUniformLocation
+         glLinkProgram
+         glMapBuffer
+         glProgramUniform1f
+         glProgramUniform1i
+         glProgramUniform2f
+         glProgramUniformMatrix4fv
+         glReadPixels
+         glScissor
+         glShaderSource
+         glSwapIntervalEXT
+         glTexImage1D
+         glTexImage2D
+         glTexParameteri
+         glTexSubImage1D
+         glUnmapBuffer
+         glUseProgram
+         glVertexAttribPointer
+         glViewport)

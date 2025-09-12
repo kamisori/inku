@@ -1,0 +1,9 @@
+[submodule "imgui"]
+	path = imgui
+	url = https://github.com/ocornut/imgui
+[submodule "ImGuiColorTextEdit"]
+	path = ImGuiColorTextEdit
+	url = https://github.com/BalazsJako/ImGuiColorTextEdit
+[submodule "glfw"]
+	path = glfw
+	url = https://github.com/glfw/glfw
