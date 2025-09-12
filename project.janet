@@ -153,7 +153,7 @@
 #       (os/execute ["janet" "src/bind-vk.janet"] :p)
        (os/execute ["jpm" "build"] :p))
 
-# `jpm run repl` to run a repl with access to jaylib
+# `jpm run repl` to run a repl with access to some imgui implementation binding :3
 (phony "repl" ["gen" "build"]
        (os/execute ["janet" "-l" "./build/joinkyloinky"
                             #"-l" "./build/joinkyvoinky"

@@ -1,6 +1,6 @@
 (import spork/cjanet :as c)
 
-(comment todo for glfw
+(comment todo for glfw ( among others :3 ) :
          glfwGetCocoaWindow
          glfwGetCurrentContext
 
