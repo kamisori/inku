@@ -1,4 +1,8 @@
-(use joinkyloinky)
+(comptime (if (= "example" (string/has-suffix? "example" (os/cwd)))
+            (use ./build/joinkyloinky)
+            (use ../build/joinkyloinky)))
+#(module/add-paths ./)
+
 (use spork/misc)
 (import spork/schema :as schema)
 

@@ -9,7 +9,10 @@ currently implemented:
  - ImGuiColorTextEdit: `you-can-instantiate-and-render-ONE-paste-some-text--edit-it-and-copy-it-back-out-again%`
 
 ### dependencies:
-#### aka "these" boxes:
+
+you (as a dev, looking to compile this on your own machine to make silly user interfaces) to remember to run `git submodule update --init` in case your git is to old to properly check out the repo 
+
+#### also, you might need some *magical* help aka these boxes:
 
  - `Linux ayane 6.11.0-29-generic #29-Ubuntu SMP PREEMPT_DYNAMIC Fri Jun 13 20:29:41 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux` my desktop tower, towering on top of the cliff of my desks vertical add-on shelf-thingie
  - `Linux ryuko 6.1.0-38-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.147-1 (2025-08-02) x86_64 GNU/Linux` a thinkpad x220 that says x220i on its panel.. i checked as much as i could that it really did have the faster cpu, but idk and who cares anyway, i get scammed, you get scammed, we all get scammed, im trying to be honest over here
@@ -75,8 +78,17 @@ right. pardon me turning this into a blog post, but im trying to give you some c
 anyway, using code from another, earlier work of mine: jlfw, i started binding the vulkan implementation because of above reasons, when it occured to me:
 while imgui handles most of the heavy lifting by letting me access its show-demo-widget function, openGL would not have all those neat abstractions, that vulkan is beckoning with, in favor of the most general cases like clearing the screen and drawing something another library cooked up while this janet binding tickled it in the background.
 
-## tl;dr:
+messing with uis can be fun but the tools can be clunky and scary, so not messing with native api can be a bit freeing, of course opengl is still close enough to the metal of a systems api to make this a very serious endeavour despite all my :3 and uwu and general fuckery <3
 
+
+# tl;dr
+#### (and you shouldnt!):
+
+if you are idling along on your janet-lang boat already and the imgui example app compiles all good:
+
+`jpm install https://github.com/kamisori/inku`
+
+then
 
 `(use joinkyloinky)` for the glfw + opengl3 implementation
 
@@ -85,6 +97,11 @@ example uses of what was bound so far can be found in the test directory in this
 coming soonish:
 
 `(use joinkyvoinky)` for the glfw + vulkan implementation
+
+
+#### uses spork/cjanet extensively <3
+
+#### jrap coming soon
 
 
 #### Credits to jaylib for most of the project.janet file ;3

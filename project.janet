@@ -9,9 +9,9 @@
 
 (def cflags
   (case this-os
-    :macos '["-Iglfw-3.4/src" "-Iglfw-3.4/include" "-ObjC"]
-    :windows ["-Iglfw-3.4/src" "-Iglfw-3.4/include"]
-    :openbsd '["-Iglfw-3.4/src" "-Iglfw-3.4/include" "-I/usr/X11R6/include" "-Du_char=unsigned char" "-Dalloca(x)=malloc(x)"]    
+    :macos '["-Iglfw/src" "-Iglfw/include" "-ObjC"]
+    :windows ["-Iglfw/src" "-Iglfw/include"]
+    :openbsd '["-Iglfw/src" "-Iglfw/include" "-I/usr/X11R6/include" "-Du_char=unsigned char" "-Dalloca(x)=malloc(x)"]    
     #default
     '["-Iglfw/src" "-Iglfw/include" "-Iimgui" "-Iimgui/backends" "-IImGuiColorTextEdit"]))
 
@@ -150,8 +150,17 @@
 
 (phony "gen" []
        (os/execute ["janet" "src/bind-inku.janet"] :p)
-#       (os/execute ["janet" "src/bind-vk.janet"] :p)
-       (os/execute ["jpm" "build"] :p))
+       #       (os/execute ["janet" "src/bind-vk.janet"] :p)
+       )
+
+(phony "tst" ["gen" "build"]
+       (os/execute ["jpm" "test"] :p)
+       (os/cd "example")
+       #(os/execute ["sh" "-c" "\"cd example && jpm build && cd ..\""] :p)
+       (os/execute ["jpm" "build"] :p)
+       )
+
+
 
 # `jpm run repl` to run a repl with access to some imgui implementation binding :3
 (phony "repl" ["gen" "build"]
