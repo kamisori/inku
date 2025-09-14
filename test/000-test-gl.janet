@@ -39,6 +39,8 @@
                             :show-demo-window true
                             :show-another-window false
                             :clear-color [0.45 0.55 0.60 1.00]
+                            :input-buffer-test (buffer/new-filled 1)
+                            :example-list @{:selected 0 :items @["asd" "qwe"]}
                             :f 0.0
                             :counter 0}]
                 (while (not (jlfw__close-window? window))
@@ -59,13 +61,22 @@
                       (do
                         (inku__begin "Hello, world!")
                         (inku__text "This is some useful text.")
+                        (inku__text "input here:")
+                        (inku__same-line)
+                        (update state :input-buffer-test                           
+                           |(inku__input-text "input label" $0))
                         (update state :show-demo-window
                            |(inku__checkbox "Demo Window" $0))
                         (update state :show-another-window 
                            |(inku__checkbox "Another Window" $0))
                         (update state :f
                            |(inku__slider-float "float"
-                                                 $0 0.0 1.0))
+                                                $0 0.0 1.0))
+                        (update state :example-list
+                           |(let [{:items its
+                                  :selected sel} $0]
+                              @{:selected (inku__list-box "a list" sel its)
+                                :items its}))
                         (update state :clear-color
                            |(let [[r g b a] $0]
                               (let [[foc new-colors] (inku__color-edit3 "clear color" r g b)]

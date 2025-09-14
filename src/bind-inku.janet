@@ -429,6 +429,46 @@ NULL #      inku_texteditor_gc_mark
        (do
          (ImGui::Text str NULL)
          (return (janet_wrap_nil)))))
+(macex1
+ '(c/cfunction inku__input-text
+   :static
+     ""
+   [label:cstring buffer:buffer] -> :Janet
+     (do
+       (janet_buffer_ensure buffer (+ 1 (-> buffer capacity)) 1)
+       (ImGui::InputText
+        label
+        (cast char* (-> buffer data))
+        (-> buffer capacity))
+       (return (janet_wrap_buffer buffer))
+       )))
+
+(macex1
+ '(c/cfunction inku__list-box
+   :static
+     ""
+   [label:cstring currentlyselected:int32 items:array] -> :Janet
+     (do
+       (def arlen (-> items count))
+       (def
+         (tmparr "char**")
+         (cast "char**"
+               (janet_smalloc (* arlen
+                                 (sizeof "char**")))))
+       (def (i :int))
+       (for [(set i 0) (< i arlen) (++ i)]
+           (set (aref tmparr i) (cast char* (janet_unwrap_string (aref (-> items data)  i))))
+           )
+       
+       (ImGui::ListBox label
+                       (addr currentlyselected)
+                       tmparr
+                       arlen)
+       (janet_sfree tmparr)
+       (return (janet_wrap_integer currentlyselected))
+       )
+  ))
+
   )
 
 (defn get-joinky-loinky-binding []
@@ -452,8 +492,7 @@ NULL #      inku_texteditor_gc_mark
       (flush))
     (string outbuffer)))
 
-
-(def filepath "./src/generated_glfw_and_opengl3.cpp")
+(def filepath (get (dyn *args*) 1))
 
 (try
   (os/rm filepath)

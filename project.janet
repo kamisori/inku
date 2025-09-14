@@ -149,18 +149,20 @@
           ;lflags])
 
 (phony "gen" []
-       (os/execute ["janet" "src/bind-inku.janet"] :p)
-       #       (os/execute ["janet" "src/bind-vk.janet"] :p)
+       (os/execute ["janet" "src/bind-inku.janet" "./src/generated_glfw_and_opengl3.cpp"] :p)
+       #       (os/execute ["janet" "src/bind-vk.janet" "./src/generated_glfw_and_vulkan.cpp"] :p)
        )
 
 (phony "tst" ["gen" "build"]
        (os/execute ["jpm" "test"] :p)
        (os/cd "example")
-       #(os/execute ["sh" "-c" "\"cd example && jpm build && cd ..\""] :p)
        (os/execute ["jpm" "build"] :p)
+       (os/cd "..")
        )
 
-
+(phony "inst" ["tst"]
+       (os/execute ["jpm" "install"] :p)
+       )
 
 # `jpm run repl` to run a repl with access to some imgui implementation binding :3
 (phony "repl" ["gen" "build"]
