@@ -129,11 +129,7 @@
               (inku__style-colors-light)
               (inku__impl-glfw-init-for-opengl window true)
               (inku__impl-opengl3-init glsl_version)
-              (let [btn1 (make-button "clickme"
-                                      |(put $0 :label "thanks"))
-                    btn2 (make-button "clickme"
-                                      |(put $0 :label "run"))
-                    buttonlabels @["thanks" "run"]
+              (let [buttonlabels @["thanks" "run"]
                     buttons (map |(make-button "clickme" $0)
                                  (map labelsettermacro buttonlabels))
                     state @{:windows @[(make-window "hello" ;buttons)]}]

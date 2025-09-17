@@ -32,7 +32,10 @@
               (inku__style-colors-light)
               (inku__impl-glfw-init-for-opengl window true)
               (inku__impl-opengl3-init glsl_version)
-              (let [state @{:show-my-window @{:value true
+              (let [state @{:texteditor @{:size @[-1 -1]
+                                          :define-size? true
+                                         :show-border false}
+                            :show-my-window @{:value true
                                               :updater |(inku__checkbox "Demo Window" $0)
                                              # :window :main
                                              }
@@ -105,13 +108,42 @@
                         (inku__text "Hello from another window!")
                         (when (inku__button "Close Me")
                           (put state :show-another-window false))
-                        (if-not (has-key? state :te)
-                          (when (inku__button "init texteditor")
-                            (put state :te (inku__texteditor)))
+                        (comment if-not (has-key? state :telib)
+                          (when (inku__button "init texteditor lib")
+                            (put state :telib (inku__get-texteditor-library)))
                           (when (inku__button "deinit texteditor")
-                            (put state :te nil)))
-                        (when (has-key? state :te)
-                          (:render (state :te) "TextEditor"))
+                            (put state :telib nil)))
+                        (comment   if (nil? (get-in state [:texteditor "a-texteditor"] nil))
+                          (do
+                            (put-in state [:texteditor "a-texteditor"]
+                                    (get (state :telib) "a-texteditor"))
+                            (pp [:created-a-texteditor
+                                   (get-in state [:texteditor "a-texteditor"] nil)]))
+                          (do
+                            (update-in state [:texteditor :define-size?]
+                                       |(let [oldval $0
+                                              newval (inku__checkbox "define-size?" oldval)]
+                                          (if (not= newval oldval)
+                                            (if newval
+                                              (put-in state [:texteditor :size] @[-1 -1])
+                                              (put-in state [:texteditor :size] nil)))
+                                          newval))
+                            (when (get-in state [:texteditor :size])
+                              (update-in state [:texteditor :size 0]
+                                         |(inku__slider-float "width of editor"
+                                                              $0 -1.0 1000.0))
+                              (update-in state [:texteditor :size 1]
+                                         |(inku__slider-float "height of editor"
+                                                              $0 -1.0 1000.0)))
+                            (update-in state [:texteditor :show-border]
+                                       |(inku__checkbox "border?" $0))
+                            (when (has-key? state :te)
+                              (:render (get-in state [:texteditor "a-texteditor"])
+                                       "TextEditor"
+                                       (get-in state [:texteditor :size])
+                                       (if (get-in state [:texteditor :show-border])
+                                         :true
+                                          :false)))))
                         (inku__end))
                       
                       (inku__render)

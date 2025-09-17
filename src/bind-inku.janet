@@ -2,112 +2,10 @@
 
 (import ./bind-glfw :as b)
 (import ./bind-gl :as d)
+#(import ./bind-inku-textedit :as e)
 
 (defn get-inku-binding []
   ## minimal imgui example
-
-
-##  (print "int (*inku_texteditor_get)(void* p, Janet key, Janet *out);")
-
-##  (macex1 (c/typedef inku_texteditor_AT (const JanetAbstractType)))
-  
-(print "extern JANET_API const JanetAbstractType inku_texteditor_AT;")
-
-  (macex1
-   '(c/cfunction
-     inku_texteditor_render
-     [te:Janet label:cstring] -> Janet
-     (def (unwrapped void*) NULL)
-     (if (janet_checktype te JANET_ABSTRACT)
-       (set unwrapped (janet_unwrap_abstract te)))
-     (if (== (janet_abstract_type unwrapped) (addr inku_texteditor_AT))
-       ((-> (cast TextEditor* unwrapped) Render) label))
-     (return (janet_wrap_nil))))
-  
-  (macex1
-   (c/declare
-    (inku_texteditor_functions
-     (array JanetMethod))
-    "static const"
-    @[
-      @["render" _generated_cfunction_inku_texteditor_render]
-      @[NULL NULL]
-     ]))
-
-  (macex1
-   (c/function
-    inku_texteditor_gc
-    [p:void* s:size_t] -> int
-    #    '"(void) s"
-    (printf "p: %p s: %ld\n" p s)
-    (fflush stdout)
-    (def (te TextEditor*) (cast TextEditor* p))
-    (if (!= NULL te)
-      (do
-        '"delete te"
-       (set te NULL)))
-    (return 0)))
-
-(macex1
- (c/function
-  inku_texteditor_gc_mark
-  [p:void* s:size_t] -> int
-  '"(void) s"
-  (def (te TextEditor*) (cast TextEditor* p))
-  (janet_mark (janet_wrap_abstract te))
-  (return 0)))
-
-  (macex1
-   (c/function
-    inku_texteditor_get
-    [p:void* key:Janet out:Janet*] -> int
-    '"(void) p"
-    (if (janet_checktype key JANET_KEYWORD)
-      (return
-       (janet_getmethod
-        (janet_unwrap_keyword key) inku_texteditor_functions out))
-      (return 0))))
-
-  (macex1
-   (c/declare
-    (inku_texteditor_AT
-     JanetAbstractType)
-    "const"
-    @[
-      "imku Texteditor AT"
-NULL #      inku_texteditor_gc
-NULL #      inku_texteditor_gc_mark
-      inku_texteditor_get
-      JANET_ATEND_GET
-     ]))
-  
-(print "static const TextEditor editor;")
-
-  (macex1
-   '(c/cfunction inku__texteditor
-     :static
-       ""
-     [] -> :Janet
-       (def
-         (nte TextEditor*)
-         '"new(janet_abstract_threaded(&inku_texteditor_AT, sizeof(TextEditor)))TextEditor()")
-     (return
-      (janet_wrap_abstract nte))))
-
-  (macex1
-   '(c/cfunction inku__texteditor____alternative
-     :static
-       ""
-     [] -> :Janet
-     (def (nte TextEditor*)
-       '"(TextEditor*)janet_abstract_threaded(&inku_texteditor_AT, sizeof(TextEditor))")
-     (set *nte editor)
-     (return
-      (janet_wrap_abstract nte))))
-
-
-#### now for putting the get method back into the abstract type
-
   (macex1
    '(c/cfunction inku__begin_b
      :static
@@ -429,45 +327,45 @@ NULL #      inku_texteditor_gc_mark
        (do
          (ImGui::Text str NULL)
          (return (janet_wrap_nil)))))
-(macex1
- '(c/cfunction inku__input-text
-   :static
-     ""
-   [label:cstring buffer:buffer] -> :Janet
-     (do
-       (janet_buffer_ensure buffer (+ 1 (-> buffer capacity)) 1)
-       (ImGui::InputText
-        label
-        (cast char* (-> buffer data))
-        (-> buffer capacity))
-       (return (janet_wrap_buffer buffer))
-       )))
+  (macex1
+   '(c/cfunction inku__input-text
+     :static
+       ""
+     [label:cstring buffer:buffer] -> :Janet
+       (do
+         (janet_buffer_ensure buffer (+ 1 (-> buffer capacity)) 1)
+         (ImGui::InputText
+          label
+          (cast char* (-> buffer data))
+          (-> buffer capacity))
+         (return (janet_wrap_buffer buffer))
+         )))
 
-(macex1
- '(c/cfunction inku__list-box
-   :static
-     ""
-   [label:cstring currentlyselected:int32 items:array] -> :Janet
-     (do
-       (def arlen (-> items count))
-       (def
-         (tmparr "char**")
-         (cast "char**"
-               (janet_smalloc (* arlen
-                                 (sizeof "char**")))))
-       (def (i :int))
-       (for [(set i 0) (< i arlen) (++ i)]
-           (set (aref tmparr i) (cast char* (janet_unwrap_string (aref (-> items data)  i))))
-           )
-       
-       (ImGui::ListBox label
-                       (addr currentlyselected)
-                       tmparr
-                       arlen)
-       (janet_sfree tmparr)
-       (return (janet_wrap_integer currentlyselected))
-       )
-  ))
+  (macex1
+   '(c/cfunction inku__list-box
+     :static
+       ""
+     [label:cstring currentlyselected:int32 items:array] -> :Janet
+       (do
+         (def arlen (-> items count))
+         (def
+           (tmparr "char**")
+           (cast "char**"
+                 (janet_smalloc (* arlen
+                                   (sizeof "char**")))))
+         (def (i :int))
+         (for [(set i 0) (< i arlen) (++ i)]
+             (set (aref tmparr i) (cast char* (janet_unwrap_string (aref (-> items data)  i))))
+             )
+         
+         (ImGui::ListBox label
+                         (addr currentlyselected)
+                         tmparr
+                         arlen)
+         (janet_sfree tmparr)
+         (return (janet_wrap_integer currentlyselected))
+         )
+    ))
 
   )
 
@@ -483,11 +381,12 @@ NULL #      inku_texteditor_gc_mark
       (print `#include "imgui_impl_glfw.h"`)
       (print `#include "imgui_impl_opengl3.h"`)
       
-      (print `#include "TextEditor.h"`)
+#      (print `#include "TextEditor.h"`)
 
       (b/get-joinky-binding)
       (d/get-loinky-binding)
       (get-inku-binding)
+#      (e/get-inku-texteditor-binding)
       (macex1 '(c/module-entry "joinkyloinky"))
       (flush))
     (string outbuffer)))

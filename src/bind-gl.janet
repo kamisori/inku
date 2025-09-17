@@ -27,7 +27,7 @@
        (do
          (def (tmp GLbitfield) 0)
          (def arlen (janet_length args))
-         (def (i :uint) 0)
+         (def (i uint32_t) 0)
          (for [(set i 0) (< i arlen) (++ i)]
              (set tmp
                   (bor tmp

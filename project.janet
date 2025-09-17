@@ -10,7 +10,7 @@
 (def cflags
   (case this-os
     :macos '["-Iglfw/src" "-Iglfw/include" "-ObjC"]
-    :windows ["-Iglfw/src" "-Iglfw/include"]
+    :windows ["-Iglfw/src" "-Iglfw/include" "-Iimgui" "-Iimgui/backends" "-IImGuiColorTextEdit"]
     :openbsd '["-Iglfw/src" "-Iglfw/include" "-I/usr/X11R6/include" "-Du_char=unsigned char" "-Dalloca(x)=malloc(x)"]    
     #default
     '["-Iglfw/src" "-Iglfw/include" "-Iimgui" "-Iimgui/backends" "-IImGuiColorTextEdit"]))
@@ -32,7 +32,7 @@
    "imgui/imgui_widgets.cpp"
    "imgui/backends/imgui_impl_glfw.cpp"
    "imgui/backends/imgui_impl_opengl3.cpp"
-   "ImGuiColorTextEdit/TextEditor.cpp"
+#   "ImGuiColorTextEdit/TextEditor.cpp"
    "glfw/src/context.c"
    "glfw/src/egl_context.c"
    "glfw/src/glx_context.c"
@@ -74,7 +74,8 @@
       ])])
 
 (def header-files
-  ["glfw/include/GLFW/glfw3.h"
+  ["imgui/imgui.h"
+   "glfw/include/GLFW/glfw3.h"
    "glfw/include/GLFW/glfw3native.h"
    "glfw/src/internal.h"
    "glfw/src/mappings.h"
@@ -124,7 +125,9 @@
  :headers header-files
 
  :lflags [;default-lflags
-          ;lflags  "-lGL"])
+          ;lflags (case this-os
+                    :linux "-lGL"
+                    :windows "opengl32.lib")])
 
 
 (comment declare-native

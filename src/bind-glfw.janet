@@ -21,7 +21,7 @@
    (c/typedef KeyDef
               (struct
                name (const char*)
-               key uint)))
+               key uint32_t)))
 
   (macex1
    (c/declare
@@ -142,7 +142,7 @@
   (macex1   
    (c/function joinky_castdef
                :static
-      [argv:Janet (defs "const KeyDef*") (count int)] -> int
+      [argv:Janet (definitions "const KeyDef*") (count int)] -> int
       (if (janet_checkint argv)
         (return (janet_unwrap_integer argv))
         (do
@@ -152,12 +152,12 @@
           (def (lo int) 0)
           (while (<= lo hi)
             (def (mid int) (/ (+ lo hi) 2))
-            (def (cmp int) (strcmp (. (aref defs mid) name) name))
+            (def (cmp int) (strcmp (. (aref definitions mid) name) name))
             (if (< cmp 0)
               (set lo (+ mid 1))
               (if (> cmp 0)
                 (set hi (- mid 1))
-                (return (. (aref defs mid) key)))))
+                (return (. (aref definitions mid) key)))))
           (janet_panicf "unknown key :%s" name)))))
 
   (macex1
