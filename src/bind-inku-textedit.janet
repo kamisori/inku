@@ -2,6 +2,7 @@
 
 (import ./bind-glfw :as b)
 (import ./bind-gl :as d)
+(import ./bind-inku :as e)
 
 (defn get-inku-texteditor-binding []
   ## minimal imgui example
@@ -200,3 +201,34 @@
   #### now for putting the get method back into the abstract type
   )
 
+(defn get-joinky-loinky-textedit-binding []
+
+  (let [outbuffer (buffer)]
+    (with-dyns [*out* outbuffer]
+      (c/include <janet.h>)
+      (c/include <stdbool.h>)
+
+      (print `#include "GLFW/glfw3.h"`)
+      (print `#include "imgui.h"`)
+
+      (print `#include "imgui_impl_glfw.h"`)
+      (print `#include "imgui_impl_opengl3.h"`)
+      
+      (print `#include "TextEditor.h"`)
+
+      (b/get-joinky-binding)
+      (d/get-loinky-binding)
+      (e/get-inku-binding)
+      (get-inku-texteditor-binding)
+      (macex1 '(c/module-entry "joinkyloinky"))
+      (flush))
+    (string outbuffer)))
+
+(def filepath (get (dyn *args*) 1))
+
+(try
+  (os/rm filepath)
+  ([err] (print "err: " err)))
+
+(->> (get-joinky-loinky-textedit-binding)
+     (spit filepath ))

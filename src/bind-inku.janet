@@ -2,7 +2,7 @@
 
 (import ./bind-glfw :as b)
 (import ./bind-gl :as d)
-#(import ./bind-inku-textedit :as e)
+
 
 (defn get-inku-binding []
   ## minimal imgui example
@@ -292,7 +292,7 @@
          (return (janet_wrap_nil)))))
 
   (macex1
-   '(c/cfunction inku__slider-float "float"
+   '(c/cfunction inku__slider-float
      :static
        ""
      [label:cstring value:float minv:float maxv:float] -> :Janet
@@ -327,18 +327,30 @@
        (do
          (ImGui::Text str NULL)
          (return (janet_wrap_nil)))))
+  
   (macex1
    '(c/cfunction inku__input-text
      :static
        ""
      [label:cstring buffer:buffer] -> :Janet
        (do
-         (janet_buffer_ensure buffer (+ 1 (-> buffer capacity)) 1)
-         (ImGui::InputText
-          label
-          (cast char* (-> buffer data))
-          (-> buffer capacity))
-         (return (janet_wrap_buffer buffer))
+         (def (prevcapa size_t) (-> buffer capacity))
+         (janet_buffer_ensure buffer (+ 128 (-> buffer count)) 2)
+         (def (buf_count size_t) (strlen (cast char* (-> buffer data))))
+         (if (!= prevcapa (-> buffer capacity))
+           (memset (cast void*
+                         (addr (aref (-> buffer data)
+                                     buf_count)))
+                   0
+                   (- (-> buffer capacity)
+                      buf_count)))
+         (if (ImGui::InputText label
+                               (cast char* (-> buffer data))
+                               (-> buffer capacity))
+           (do
+             (def (buf_count size_t) (strlen (cast char* (-> buffer data))))
+             (janet_buffer_setcount buffer buf_count)))
+           (return (janet_wrap_buffer buffer))
          )))
 
   (macex1
@@ -364,9 +376,16 @@
                          arlen)
          (janet_sfree tmparr)
          (return (janet_wrap_integer currentlyselected))
-         )
-    ))
-
+         )))
+  
+  (macex1
+   '(c/cfunction inku__radiobutton
+     :static
+       ""
+     [label:cstring (data int) (button int)] -> :Janet
+       (if (ImGui::RadioButton label (addr data) button)
+         (return (janet_wrap_number data))
+         (return (janet_wrap_nil)))))
   )
 
 (defn get-joinky-loinky-binding []
@@ -380,13 +399,10 @@
 
       (print `#include "imgui_impl_glfw.h"`)
       (print `#include "imgui_impl_opengl3.h"`)
-      
-#      (print `#include "TextEditor.h"`)
 
       (b/get-joinky-binding)
       (d/get-loinky-binding)
       (get-inku-binding)
-#      (e/get-inku-texteditor-binding)
       (macex1 '(c/module-entry "joinkyloinky"))
       (flush))
     (string outbuffer)))

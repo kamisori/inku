@@ -39,6 +39,10 @@
                                               :updater |(inku__checkbox "Demo Window" $0)
                                              # :window :main
                                              }
+                            :radiostatedata 0
+                            :radiostate0 0
+                            :radiostate1 1
+                            :radiostate2 2
                             :show-demo-window true
                             :show-another-window false
                             :clear-color [0.45 0.55 0.60 1.00]
@@ -66,8 +70,10 @@
                         (inku__text "This is some useful text.")
                         (inku__text "input here:")
                         (inku__same-line)
-                        (update state :input-buffer-test                           
+                        (update state :input-buffer-test
                            |(inku__input-text "input label" $0))
+                        (when (inku__button "log input text")
+                          (print (string (get state :input-buffer-test))))
                         (update state :show-demo-window
                            |(inku__checkbox "Demo Window" $0))
                         (update state :show-another-window 
@@ -89,6 +95,12 @@
                                   [r g b a]))))
                         (when (inku__button "Button")
                           (update state :counter inc))
+                        (if-let [result (inku__radiobutton (string "state" 0) (get state :radiostatedata) (get state :radiostate0))]
+                          (put state :radiostatedata result))
+                        (if-let [result (inku__radiobutton (string "state" 1) (get state :radiostatedata) (get state :radiostate1))]
+                          (put state :radiostatedata result))
+                        (if-let [result (inku__radiobutton (string "state" 2) (get state :radiostatedata) (get state :radiostate2))]
+                          (put state :radiostatedata result))
                         (inku__same-line)
                         (inku__text (string/format
                                       "counter = %d"

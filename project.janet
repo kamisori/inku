@@ -32,7 +32,6 @@
    "imgui/imgui_widgets.cpp"
    "imgui/backends/imgui_impl_glfw.cpp"
    "imgui/backends/imgui_impl_opengl3.cpp"
-#   "ImGuiColorTextEdit/TextEditor.cpp"
    "glfw/src/context.c"
    "glfw/src/egl_context.c"
    "glfw/src/glx_context.c"
@@ -120,7 +119,7 @@
            "_DARWIN_C_SOURCE" (if (= this-os :macos) "1" nil)
            "_GNU_SOURCE" true}
  
- :source ["src/generated_glfw_and_opengl3.cpp" ;source-files]
+ :source ["src/generated_glfw_opengl3_and_imgui.cpp" ;source-files]
 
  :headers header-files
 
@@ -129,9 +128,8 @@
                     :linux "-lGL"
                     :windows "opengl32.lib")])
 
-
 (comment declare-native
- :name "joinkyvoinky"
+ :name "joinkyloinkytoinky"
  
  :cflags [;default-cflags
           ;cflags]
@@ -143,32 +141,36 @@
            "_POSIX_C_SOURCE" "200809L"
            "_DARWIN_C_SOURCE" (if (= this-os :macos) "1" nil)
            "_GNU_SOURCE" true}
-
- :source ["src/generated_glfw_and_vulkan.cpp" ;source-files]
+ 
+ :source [
+          "src/generated_glfw_opengl3_imgui_and_texteditor.cpp"
+          "ImGuiColorTextEdit/TextEditor.cpp"
+          ;source-files]
 
  :headers header-files
 
  :lflags [;default-lflags
-          ;lflags])
+          ;lflags (case this-os
+                    :linux "-lGL"
+                    :windows "opengl32.lib")])
 
 (phony "gen" []
-       (os/execute ["janet" "src/bind-inku.janet" "./src/generated_glfw_and_opengl3.cpp"] :p)
-       #       (os/execute ["janet" "src/bind-vk.janet" "./src/generated_glfw_and_vulkan.cpp"] :p)
+       (os/execute ["janet" "src/bind-inku.janet" "./src/generated_glfw_opengl3_and_imgui.cpp"] :p)
+#       (os/execute ["janet" "src/bind-inku-textedit.janet" "./src/generated_glfw_opengl3_imgui_and_texteditor.cpp"] :p)
        )
 
 (phony "tst" ["gen" "build"]
        (os/execute ["jpm" "test"] :p)
        (os/cd "example")
        (os/execute ["jpm" "build"] :p)
-       (os/cd "..")
-       )
+       (os/cd ".."))
 
 (phony "inst" ["tst"]
-       (os/execute ["jpm" "install"] :p)
-       )
+       (os/execute ["jpm" "install"] :p))
 
 # `jpm run repl` to run a repl with access to some imgui implementation binding :3
 (phony "repl" ["gen" "build"]
-       (os/execute ["janet" "-l" "./build/joinkyloinky"
-                            #"-l" "./build/joinkyvoinky"
-                   ] :p))
+       (os/execute ["janet" "-l" "./build/joinkyloinky"] :p))
+
+(phony "repl-w-textedit" ["gen" "build"]
+       (os/execute ["janet" "-l" "./build/joinkyloinkytoinky"] :p))
