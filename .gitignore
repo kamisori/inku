@@ -1,6 +1,6 @@
 build/
 imgui.ini
-*.*~
+*~
 
 example/build/
 example/imgui.ini
