@@ -10,17 +10,7 @@ currently implemented:
 
 ### dependencies:
 
-you (as a dev, looking to compile this on your own machine to make silly user interfaces) to remember to run `git submodule update --init` in case your git is to old to properly check out the repo 
-
-#### also, you might need some *magical* help aka these boxes:
-
- - `Linux ayane 6.11.0-29-generic #29-Ubuntu SMP PREEMPT_DYNAMIC Fri Jun 13 20:29:41 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux` my desktop tower, towering on top of the cliff of my desks vertical add-on shelf-thingie
- - `Linux ryuko 6.1.0-38-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.147-1 (2025-08-02) x86_64 GNU/Linux` a thinkpad x220 that says x220i on its panel.. i checked as much as i could that it really did have the faster cpu, but idk and who cares anyway, i get scammed, you get scammed, we all get scammed, im trying to be honest over here
- - `Windows 10 BLUMENKOHL` .. idk much about this one right now... cant just ssh in there... its my wifes box, so yeah but:::
-   - while setting up the build environment:
-   - spork wouldnt install from `master`
-     - because the cmath object file had an unresolved symbol: `_div128`
-
+you (as a dev, looking to compile this on your own machine to make silly user interfaces) to remember to run `git submodule update --init` in case your git is to old to properly check out the repo (or idfk why it does that sometimes..)~
 
  - imgui: v1.91.4 # below text editor extension is blocking me from upgrading
  - ImGuiColorTextEdit: master  :fingers-crossed :hj
@@ -29,13 +19,12 @@ you (as a dev, looking to compile this on your own machine to make silly user in
  - jpm: master
  - spork: master
 
-
 ### build instructions:
 
 make sure you have all libraries installed with development headers:
  - check the glfw documentation (<inkurootdir>/glfw/docs/compile.md) for build instructions and dependencies.
 
-in glfw subdirectory: ( utterly optional btw :)
+in glfw subdirectory: ( utterly optional btw :) (i think, though reviewing this and remembering the different machines i did this on i remember at least once thinking something like "so c-making glfw ISNT optional" perhaps because during the initial cmake step some file is generated or rather copied into the include path i specify in project.janet, not sure)~
 
 ```
 mkdir build
@@ -65,7 +54,7 @@ you will also require janet (https://github.com/janet-lang/janet) on your path a
 once you have prepared your system and can run the imgui example app, you may run `jpm run gen` and then `jpm test` in the <inkurootdir>
 a native binary with a minimal test app will be put into the build folder along a module file that can be installed using `jpm install`
 
-### usage:
+### usage (or how i stopped worriying and just embraced the mountain):
 
 my main reason to attempt the wgpu implementation was the future proofing novelty factor.
 i dont remember why building the wgpu example or dawn failed on this machine.

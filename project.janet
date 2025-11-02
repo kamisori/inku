@@ -154,23 +154,34 @@
                     :linux "-lGL"
                     :windows "opengl32.lib")])
 
-(phony "gen" []
+(task "submodules" []
+       (os/execute ["git" "submodule" "update" "--init" "--recursive"] :p))
+
+(task "gen" ["submodules"]
        (os/execute ["janet" "src/bind-inku.janet" "./src/generated_glfw_opengl3_and_imgui.cpp"] :p)
 #       (os/execute ["janet" "src/bind-inku-textedit.janet" "./src/generated_glfw_opengl3_imgui_and_texteditor.cpp"] :p)
        )
 
-(phony "tst" ["gen" "build"]
+(task "tst" ["gen" "build"]
        (os/execute ["jpm" "test"] :p)
        (os/cd "example")
        (os/execute ["jpm" "build"] :p)
        (os/cd ".."))
 
-(phony "inst" ["tst"]
+(task "inst" ["tst"]
        (os/execute ["jpm" "install"] :p))
 
 # `jpm run repl` to run a repl with access to some imgui implementation binding :3
-(phony "repl" ["gen" "build"]
+(task "repl" ["gen" "build"]
        (os/execute ["janet" "-l" "./build/joinkyloinky"] :p))
 
-(phony "repl-w-textedit" ["gen" "build"]
+(task "repl-w-textedit" ["gen" "build"]
        (os/execute ["janet" "-l" "./build/joinkyloinkytoinky"] :p))
+
+
+(add-output "submodules" "glfw/include/GLFW/glfw3.h")
+(add-input "gen" "submodules")
+
+(add-output "gen" "src/generated_glfw_opengl3_and_imgui.cpp")
+(add-input "build" "gen")
+

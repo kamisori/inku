@@ -325,7 +325,7 @@
        ""
      [str:cstring] -> :Janet
        (do
-         (ImGui::Text str NULL)
+         (ImGui::Text "%s" str)
          (return (janet_wrap_nil)))))
   
   (macex1
@@ -357,26 +357,38 @@
    '(c/cfunction inku__list-box
      :static
        ""
-     [label:cstring currentlyselected:int32 items:array] -> :Janet
+     [label:cstring currentlyselected:int32 jitems:Janet] -> :Janet
+       (def (tmparr "char**") NULL)
+     (def (arlen int32_t) 0)
+     (if (janet_checktype jitems JANET_ARRAY)
        (do
-         (def arlen (-> items count))
-         (def
-           (tmparr "char**")
-           (cast "char**"
-                 (janet_smalloc (* arlen
-                                   (sizeof "char**")))))
+         (def items (janet_unwrap_array jitems))
+         (set arlen (-> items count))
+         (set tmparr
+              (cast "char**"
+                    (janet_smalloc (* (+ 1 arlen)
+                                      (sizeof "char**")))))
          (def (i :int))
          (for [(set i 0) (< i arlen) (++ i)]
-             (set (aref tmparr i) (cast char* (janet_unwrap_string (aref (-> items data)  i))))
-             )
-         
+             (set (aref tmparr i) (cast char* (janet_unwrap_string (aref (-> items data)  i))))))
+       (if (janet_checktype jitems JANET_TUPLE)
+         (do
+           (def items (janet_unwrap_tuple jitems))
+           (set arlen (janet_tuple_length items))
+           (set tmparr
+                (cast "char**"
+                      (janet_smalloc (* (+ 1 arlen)
+                                        (sizeof "char**")))))
+           (def (i :int))
+           (for [(set i 0) (< i arlen) (++ i)]
+               (set (aref tmparr i) (cast char* (janet_unwrap_string (aref items i))))))))
          (ImGui::ListBox label
                          (addr currentlyselected)
                          tmparr
                          arlen)
          (janet_sfree tmparr)
          (return (janet_wrap_integer currentlyselected))
-         )))
+         ))
   
   (macex1
    '(c/cfunction inku__radiobutton
