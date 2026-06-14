@@ -72,6 +72,7 @@ while imgui handles most of the heavy lifting by letting me access its show-demo
 messing with uis can be fun but the tools can be clunky and scary, so not messing with native api can be a bit freeing, of course opengl is still close enough to the metal of a systems api to make this a very serious endeavour despite all my :3 and uwu and general fuckery <3
 
 
+# jump here if you just want to get things started:
 # tl;dr
 #### (and you shouldnt!):
 
@@ -81,13 +82,52 @@ if you are idling along on your janet-lang boat already and the imgui example ap
 
 then
 
-`(use joinkyloinky)` for the glfw + opengl3 implementation
+`(use joinkyloinky)` for the glfw + opengl3 implementation of this binding
 
 example uses of what was bound so far can be found in the test directory in this repo
 
 coming soonish:
 
 `(use joinkyvoinky)` for the glfw + vulkan implementation
+
+
+also coming but more soonish:
+
+an opinionated tk wrapping all these cfunctions into something easy to use as this example:
+
+```janet
+(use inku-widgets)
+(use somecustomfunctions)
+
+(defn main
+    `an ui for stuff`
+    [& args]
+    (init-state)
+    (let [target-store (recall-store :target)
+          source-store (recall-store ::source)
+##############################################
+# here comes ui definitions:
+          ui [:window "toolbox"
+              [[:button "quit" (fn [_] (store :close? :yepp))]
+               [:button "docme" (fn [_] (import ./doc-me-this_inku :as docme :fresh :yes)
+                                  (process-closing-window-description "doc-me-this"
+                                                                      docme/ui-closing
+                                                                      (fn on-exit [] (pp :bye-doc))))]
+               [:text "current target directory for spitting files:"]
+               [:text |(:recall target-store $ "") :cwd]
+               [:button "show target directory browser" browse-dirs]
+               [:text "enter url to download or query:"]
+               [:input-text "url"]
+               [:text "enter a filename for downloading files into:"]
+               [:input-text "filename"]
+               [:button "save url to filename" save-url-to-file]
+               [:button "slurp from url, show in texteditor" slurp-url-show-lines]
+               [:text list-field-keys :stores]
+              ]
+             ]
+          main-fn (make-main-fn "example application" [640 480] ui)]
+        (main-fn)))
+```
 
 
 #### uses spork/cjanet extensively <3
