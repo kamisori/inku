@@ -146,7 +146,22 @@ and the other projects too :3
 otherwise, this tree is mine to piss on and bark at, if you want to join in and help the tree grow, give a yelp :3
 
 
-ps: that last part abour pissing is a vibecheck, just like @tay@transfem.social/116747847335048316 
+ps: that last part abour pissing and barking is a vibecheck, and just like suggested by
+
+`@tay@transfem.social/116747847335048316` :
+
+```
+Tay
+@tay@transfem.social
+----------------------------------------------------
+How to make good open source project:
+- plaster pride flags everywhere (keeps bigots away)
+- swear constantly (keeps ai away)
+- sex (keeps corporations away)
+----------------------------------------------------
+Jun 14, 2026, 11:52 AM
+```
+
 🏳️‍⚧️ ⚧️ 🏳️‍🌈 🍉
 we are very friendly and sanitary. we bite only upon expressed wish and after prolonged vibechecking.
 
