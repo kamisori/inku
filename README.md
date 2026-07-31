@@ -1,3 +1,5 @@
+permanently moved to https://codeberg.org/mlatu/inku
+
 ## inku
 
 ### a(n opinionated but modular) janet binding for imgui
